@@ -20,17 +20,42 @@ export default function LeadForm({ state, price }: Props) {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault()
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    console.log("Lead Submitted:", {
-      ...form,
-      expedition: state,
-      estimatedPrice: price,
-    })
+  try {
+    const response = await fetch("/api/send-lead", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: form.name,
+        email: form.email,
+        phone: form.whatsapp,
+        notes: form.notes,
+        state,
+        price,
+      }),
+    });
 
-    alert("Thank you! We’ll contact you within 24 hours.")
+    const result = await response.json();
+
+    if (result.success) {
+      alert("Your expedition request has been sent successfully!");
+      setForm({
+        name: "",
+        email: "",
+        whatsapp: "",
+        notes: "",
+      });
+    } else {
+      alert("Something went wrong. Please try again.");
+    }
+  } catch (error) {
+    alert("Server error. Please try again.");
   }
+};
 
   return (
     <div className="mt-24 bg-white text-black p-10 rounded-3xl shadow-xl">
